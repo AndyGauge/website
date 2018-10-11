@@ -243,6 +243,7 @@
 <li>
 <ul>
 <li><a href="#non-blocking">Non Blocking</a></li>
+<li><a href="#included-with-tokio">Included with Tokio</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -261,7 +262,7 @@ modules including <a href="https://doc.rust-lang.org/std/fs/struct.File.html#imp
 
 <p>The <a href="https://docs.rs/tokio/0.1/tokio"><code>tokio</code></a> crate comes with a variation on those types, <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html"><code>AsyncRead</code></a> and
 <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html"><code>AsyncWrite</code></a>.  The primary difference between <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html"><code>AsyncRead</code></a> and <code>std::io::Read</code>
-is the <a href="https://docs.rs/futures/0.1.18/futures/enum.Async.html"><code>futures::Async</code></a> return values.  The implementation returns an <code>Error</code>,
+is the <a href="https://docs.rs/futures/0.1/futures/enum.Async.html"><code>futures::Async</code></a> return values.  The implementation returns an <code>Error</code>,
 <code>NotReady</code>, or <code>Ready</code> value.</p>
 
 <h2 id="non-blocking">Non Blocking</h2>
@@ -295,7 +296,24 @@ fn main() -&gt; io::Result&lt;()&gt; {
 <p>This single-threaded process will evaluate through calling <code>.incoming()</code> on
 the <code>TcpListener</code> and will continue to run until receiving a KILL signal from
 the operating system or until enough data is received on the TCP port to flush
-the buffer.</p>
+the buffer, and reevaluating <code>.incoming()</code>.</p>
+
+<p><code>Tokio</code> I/O, rather than pausing execution, uses a <code>Futures</code> based syntax to
+allow an event loop to respond to I/O rather than wait for it.  That event loop
+is <a href="https://tokio-rs.github.io/tokio/tokio_reactor/"><code>Tokio::reactor</code></a> which receives events from <a href="https://docs.rs/mio/*/mio"><code>mio</code></a>.</p>
+
+<p><a href="https://docs.rs/mio/*/mio/net/index.html"><code>mio::net</code></a> implements networking primitives that allow polling events.
+<a href="https://docs.rs/mio/*/mio/unix/index.html"><code>mio::unix</code></a> implement UNIX inter-process communication channels with polling.</p>
+
+<h2 id="included-with-tokio">Included with Tokio</h2>
+
+<p>Tokio provides the high level interfaces to asynchronous IO for</p>
+
+<ul>
+<li><a href="https://docs.rs/tokio/0.1/tokio/net/tcp/index.html"><code>TCP sockets</code></a></li>
+<li><a href="https://docs.rs/tokio/0.1/tokio/net/udp/index.html"><code>UDP sockets</code></a></li>
+<li><a href="https://docs.rs/tokio/0.1/tokio/net/unix/index.html"><code>Unix sockets</code></a></li>
+</ul>
 
       
       
