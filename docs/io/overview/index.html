@@ -238,7 +238,14 @@
     </div>
     <div class="d-none d-xl-block col-xl-2 tk-toc">
       <div class="section-nav">
-        
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#non-blocking">Non Blocking</a></li>
+</ul></li>
+</ul>
+</nav>
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
@@ -246,7 +253,9 @@
       <div class="github-edit">
         <a class="fa fa-github" href="https://github.com/tokio-rs/website/tree/master/content/docs/io/overview.md"> Edit on GitHub</a>
       </div>
-      <p>Rust <a href="https://doc.rust-lang.org/std/io/#read-and-write"><code>std::io</code></a> module provides traits that synchronously access resources like
+      
+
+<p>Rust <a href="https://doc.rust-lang.org/std/io/#read-and-write"><code>std::io</code></a> module provides traits that synchronously access resources like
 files and sockets.  These <code>Read</code> and <code>Write</code> traits are implemented in other
 modules including <a href="https://doc.rust-lang.org/std/fs/struct.File.html#implementations"><code>std::fs</code></a> and <code>std::net</code>.</p>
 
@@ -254,6 +263,39 @@ modules including <a href="https://doc.rust-lang.org/std/fs/struct.File.html#imp
 <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html"><code>AsyncWrite</code></a>.  The primary difference between <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html"><code>AsyncRead</code></a> and <code>std::io::Read</code>
 is the <a href="https://docs.rs/futures/0.1.18/futures/enum.Async.html"><code>futures::Async</code></a> return values.  The implementation returns an <code>Error</code>,
 <code>NotReady</code>, or <code>Ready</code> value.</p>
+
+<h2 id="non-blocking">Non Blocking</h2>
+
+<p>The nature of a polling data reader/writer allows for other tasks to operate
+before data reaches the socket or disk queue.  Synchronous operations evaluate
+in a guaranteed sequential manner, and require commands to complete before the
+next operation executes.</p>
+
+<p>Consider this <code>std::net</code> implementation from the <a href="https://doc.rust-lang.org/std/net/struct.TcpListener.html#examples"><code>std::net</code> examples</a></p>
+
+<pre><code class="language-rust,no_run"># #![allow(unused)]
+# use std::io;
+use std::net::{TcpListener, TcpStream};
+
+# fn handle_client(stream: TcpStream) {
+#     // ...
+# }
+#
+fn main() -&gt; io::Result&lt;()&gt; {
+    let listener = TcpListener::bind(&quot;127.0.0.1:8000&quot;)?;
+#
+#     // accept connections and process them serially
+    for stream in listener.incoming() {
+        handle_client(stream?);
+    }
+#    Ok(())
+}
+</code></pre>
+
+<p>This single-threaded process will evaluate through calling <code>.incoming()</code> on
+the <code>TcpListener</code> and will continue to run until receiving a KILL signal from
+the operating system or until enough data is received on the TCP port to flush
+the buffer.</p>
 
       
       

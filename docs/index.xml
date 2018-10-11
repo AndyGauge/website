@@ -89,7 +89,8 @@ The server is going to use a line-based protocol. Lines are terminated by \r\n. 
       
       <guid>https://tokio.rs/docs/io/overview/</guid>
       <description>Rust std::io module provides traits that synchronously access resources like files and sockets. These Read and Write traits are implemented in other modules including std::fs and std::net.
-The tokio crate comes with a variation on those types, AsyncRead and AsyncWrite. The primary difference between AsyncRead and std::io::Read is the futures::Async return values. The implementation returns an Error, NotReady, or Ready value.</description>
+The tokio crate comes with a variation on those types, AsyncRead and AsyncWrite. The primary difference between AsyncRead and std::io::Read is the futures::Async return values. The implementation returns an Error, NotReady, or Ready value.
+Non Blocking The nature of a polling data reader/writer allows for other tasks to operate before data reaches the socket or disk queue.</description>
     </item>
     
     <item>
