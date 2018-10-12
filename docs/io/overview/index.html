@@ -242,7 +242,16 @@
 <ul>
 <li>
 <ul>
-<li><a href="#non-blocking">Non Blocking</a></li>
+<li><a href="#non-blocking">Non Blocking</a>
+<ul>
+<li><a href="#mio">Mio</a>
+<ul>
+<li><a href="#evented">Evented</a></li>
+<li><a href="#polling">Polling</a></li>
+<li><a href="#primitives">Primitives</a></li>
+</ul></li>
+<li><a href="#tokio-runtime">Tokio Runtime</a></li>
+</ul></li>
 <li><a href="#included-with-tokio">Included with Tokio</a></li>
 </ul></li>
 </ul>
@@ -299,15 +308,41 @@ the operating system or until enough data is received on the TCP port to flush
 the buffer, and reevaluating <code>.incoming()</code>.</p>
 
 <p><code>Tokio</code> I/O, rather than pausing execution, uses a <code>Futures</code> based syntax to
-allow an event loop to respond to I/O rather than wait for it.  That event loop
-is <a href="https://tokio-rs.github.io/tokio/tokio_reactor/"><code>Tokio::reactor</code></a> which receives events from <a href="https://docs.rs/mio/*/mio"><code>mio</code></a>.</p>
+allow an event loop to respond to I/O rather than wait for it.  For network I/O
+the driver is <a href="https://tokio-rs.github.io/tokio/tokio_reactor/"><code>Tokio::reactor</code></a> which receives events from <a href="https://docs.rs/mio/*/mio"><code>mio</code></a>.</p>
+
+<h3 id="mio">Mio</h3>
+
+<p>Mio is a <a href="https://docs.rs/mio/*/mio/#platforms">cross platform</a> implementation of low-level I/O.  Mio&rsquo;s goal is to
+create a unified syntax to operate on a wide range of platforms.  This makes
+Tokio applications portable by default.</p>
+
+<h4 id="evented">Evented</h4>
+
+<p>Mio includes a trait <a href="https://docs.rs/mio/*/mio/event/trait.Evented.html"><code>Evented</code></a> which designates a source of <code>Event</code>.  The
+implementation of the trait <a href="https://docs.rs/mio/*/mio/struct.Poll.html#method.register"><code>register</code></a>s with <a href="https://docs.rs/mio/*/mio/struct.Poll.html"><code>Poll</code></a>.  To receive an <code>Event</code>,
+the executor will <code>poll</code> the registered <code>Evented</code> value and forward it to the
+pending future task.</p>
+
+<h4 id="polling">Polling</h4>
+
+<p>Mio&rsquo;s <a href="https://docs.rs/mio/*/mio/struct.Poll.html#method.poll"><code>Poll::poll</code></a> call is a synchronous call that blocks execution of the
+thread for a given <code>Duration</code>.  This call may generate multiple <a href="https://docs.rs/mio/*/mio/struct.Events.html"><code>Events</code></a>
+which are processed followed by another call to <code>Poll::poll</code>.</p>
+
+<h4 id="primitives">Primitives</h4>
 
 <p><a href="https://docs.rs/mio/*/mio/net/index.html"><code>mio::net</code></a> implements networking primitives that allow polling events.
 <a href="https://docs.rs/mio/*/mio/unix/index.html"><code>mio::unix</code></a> implement UNIX inter-process communication channels with polling.</p>
 
+<h3 id="tokio-runtime">Tokio Runtime</h3>
+
+<p><code>mio</code> does not provide scheduling.  Tokio shines by using configuration to
+implement a <code>Runtime Model</code> that matches the properties of a specific resource.</p>
+
 <h2 id="included-with-tokio">Included with Tokio</h2>
 
-<p>Tokio provides the high level interfaces to asynchronous IO for</p>
+<p>Tokio provides the high level interfaces to asynchronous I/O for</p>
 
 <ul>
 <li><a href="https://docs.rs/tokio/0.1/tokio/net/tcp/index.html"><code>TCP sockets</code></a></li>
