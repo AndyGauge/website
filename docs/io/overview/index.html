@@ -242,17 +242,7 @@
 <ul>
 <li>
 <ul>
-<li><a href="#non-blocking">Non Blocking</a>
-<ul>
-<li><a href="#mio">Mio</a>
-<ul>
-<li><a href="#evented">Evented</a></li>
-<li><a href="#polling">Polling</a></li>
-<li><a href="#primitives">Primitives</a></li>
-</ul></li>
-<li><a href="#tokio-runtime">Tokio Runtime</a></li>
-</ul></li>
-<li><a href="#included-with-tokio">Included with Tokio</a></li>
+<li><a href="#blocking-vs-non-blocking">Blocking vs Non-Blocking</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -265,21 +255,25 @@
       </div>
       
 
-<p>Rust <a href="https://doc.rust-lang.org/std/io/#read-and-write"><code>std::io</code></a> module provides traits that synchronously access resources like
-files and sockets.  These <code>Read</code> and <code>Write</code> traits are implemented in other
-modules including <a href="https://doc.rust-lang.org/std/fs/struct.File.html#implementations"><code>std::fs</code></a> and <code>std::net</code>.</p>
+<p>Rust provides types, traits, and helpers for performing synchronous I/O
+operations, such as working with TCP, UDP, and, reading from and writing to
+files.</p>
 
-<p>The <a href="https://docs.rs/tokio/0.1/tokio"><code>tokio</code></a> crate comes with a variation on those types, <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html"><code>AsyncRead</code></a> and
-<a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html"><code>AsyncWrite</code></a>.  The primary difference between <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html"><code>AsyncRead</code></a> and <code>std::io::Read</code>
-is the <a href="https://docs.rs/futures/0.1/futures/enum.Async.html"><code>futures::Async</code></a> return values.  The implementation returns an <code>Error</code>,
-<code>NotReady</code>, or <code>Ready</code> value.</p>
+<p>The <a href="https://docs.rs/tokio/0.1/tokio"><code>tokio</code></a> crate improves on those operations by providing non-blocking
+versions.  Tokio provides the high level interfaces to asynchronous I/O for</p>
 
-<h2 id="non-blocking">Non Blocking</h2>
+<ul>
+<li><a href="https://docs.rs/tokio/0.1/tokio/net/tcp/index.html">TCP sockets</a></li>
+<li><a href="https://docs.rs/tokio/0.1/tokio/net/udp/index.html">UDP sockets</a></li>
+<li><a href="https://docs.rs/tokio/0.1/tokio/net/unix/index.html">Unix sockets</a></li>
+<li><a href="https://docs.rs/tokio/0.1/tokio/fs/index.html">File operations</a></li>
+</ul>
 
-<p>The nature of a polling data reader/writer allows for other tasks to operate
-before data reaches the socket or disk queue.  Synchronous operations evaluate
-in a guaranteed sequential manner, and require commands to complete before the
-next operation executes.</p>
+<h2 id="blocking-vs-non-blocking">Blocking vs Non-Blocking</h2>
+
+<p>Synchronous operations evaluate in a guaranteed sequential manner, and require
+expressions to complete before the next operation executes.  This is the
+default behavior in Rust.</p>
 
 <p>Consider this <code>std::net</code> implementation from the <a href="https://doc.rust-lang.org/std/net/struct.TcpListener.html#examples"><code>std::net</code> examples</a></p>
 
@@ -305,50 +299,19 @@ fn main() -&gt; io::Result&lt;()&gt; {
 <p>This single-threaded process will evaluate through calling <code>.incoming()</code> on
 the <code>TcpListener</code> and will continue to run until receiving a KILL signal from
 the operating system or until enough data is received on the TCP port to flush
-the buffer, and reevaluating <code>.incoming()</code>.</p>
+the buffer then reevaluates <code>.incoming()</code>.</p>
 
-<p><code>Tokio</code> I/O, rather than pausing execution, uses a <code>Futures</code> based syntax to
-allow an event loop to respond to I/O rather than wait for it.  For network I/O
-the driver is <a href="https://tokio-rs.github.io/tokio/tokio_reactor/"><code>Tokio::reactor</code></a> which receives events from <a href="https://docs.rs/mio/*/mio"><code>mio</code></a>.</p>
+<p>Asynchronous I/O provides a method to register a task to execute when the
+program receives data.</p>
 
-<h3 id="mio">Mio</h3>
+<p><code>Tokio</code>, rather than pausing execution, uses a <code>Futures</code> based syntax allowing
+tasks to respond to I/O events as they arrive rather than wait for them
+Networking events are provided by <a href="https://docs.rs/mio/*/mio"><code>mio</code></a>, a non-blocking I/O library backed by
+the operating system&rsquo;s event queue.  Filesystem I/O is implemented in
+<a href="https://docs.rs/tokio/0.1/tokio/fs/index.html"><code>Tokio::fs</code></a>.</p>
 
-<p>Mio is a <a href="https://docs.rs/mio/*/mio/#platforms">cross platform</a> implementation of low-level I/O.  Mio&rsquo;s goal is to
-create a unified syntax to operate on a wide range of platforms.  This makes
-Tokio applications portable by default.</p>
-
-<h4 id="evented">Evented</h4>
-
-<p>Mio includes a trait <a href="https://docs.rs/mio/*/mio/event/trait.Evented.html"><code>Evented</code></a> which designates a source of <code>Event</code>.  The
-implementation of the trait <a href="https://docs.rs/mio/*/mio/struct.Poll.html#method.register"><code>register</code></a>s with <a href="https://docs.rs/mio/*/mio/struct.Poll.html"><code>Poll</code></a>.  To receive an <code>Event</code>,
-the executor will <code>poll</code> the registered <code>Evented</code> value and forward it to the
-pending future task.</p>
-
-<h4 id="polling">Polling</h4>
-
-<p>Mio&rsquo;s <a href="https://docs.rs/mio/*/mio/struct.Poll.html#method.poll"><code>Poll::poll</code></a> call is a synchronous call that blocks execution of the
-thread for a given <code>Duration</code>.  This call may generate multiple <a href="https://docs.rs/mio/*/mio/struct.Events.html"><code>Events</code></a>
-which are processed followed by another call to <code>Poll::poll</code>.</p>
-
-<h4 id="primitives">Primitives</h4>
-
-<p><a href="https://docs.rs/mio/*/mio/net/index.html"><code>mio::net</code></a> implements networking primitives that allow polling events.
-<a href="https://docs.rs/mio/*/mio/unix/index.html"><code>mio::unix</code></a> implement UNIX inter-process communication channels with polling.</p>
-
-<h3 id="tokio-runtime">Tokio Runtime</h3>
-
-<p><code>mio</code> does not provide scheduling.  Tokio shines by using configuration to
-implement a <code>Runtime Model</code> that matches the properties of a specific resource.</p>
-
-<h2 id="included-with-tokio">Included with Tokio</h2>
-
-<p>Tokio provides the high level interfaces to asynchronous I/O for</p>
-
-<ul>
-<li><a href="https://docs.rs/tokio/0.1/tokio/net/tcp/index.html"><code>TCP sockets</code></a></li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/net/udp/index.html"><code>UDP sockets</code></a></li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/net/unix/index.html"><code>Unix sockets</code></a></li>
-</ul>
+<p>A <code>tokio</code> equivalent to the <code>std::net</code> implementation above would register a
+future on the <code>TcpListener</code> (provided by [tokio::net::tcp]).</p>
 
       
       

@@ -317,8 +317,8 @@ utilize many cores is critical for writing fast applications.</p>
 
 <h2 id="non-blocking-i-o">Non-blocking I/O</h2>
 
-<p>When hitting the network, Tokio will used the most efficient system available to
-the operating system. On Linux this means <a href="http://man7.org/linux/man-pages/man7/epoll.7.html">epoll</a>, *bsd platforms provide <a href="https://www.freebsd.org/cgi/man.cgi?query=kqueue&amp;sektion=2">kqueue</a>,
+<p>When hitting the network, Tokio will use the most efficient system available to
+the operating system. On Linux this means <a href="http://man7.org/linux/man-pages/man7/epoll.7.html">epoll</a>, bsd platforms provide <a href="https://www.freebsd.org/cgi/man.cgi?query=kqueue&amp;sektion=2">kqueue</a>,
 and Windows has <a href="https://docs.microsoft.com/en-us/windows/desktop/fileio/i-o-completion-ports">I/O completion ports</a>.</p>
 
 <p>This allows multiplexing many sockets on a single thread and receiving
@@ -387,6 +387,10 @@ a good fit for <a href="https://en.wikipedia.org/wiki/Real-time_computing">real-
 Each component lives in a separate library. If needed, applications may opt to
 pick and choose the needed components and avoid pulling in the rest.</p>
 
+<p>Tokio leverages <a href="https://carllerche.github.io/mio/mio/index.html"><code>mio</code></a> for the system event queue and <a href="https://docs.rs/futures/*/futures/"><code>futures</code></a> for defining
+tasks.  Tokio implements <a href="https://tokio.rs/blog/2018-08-async-await/">async</a> syntax to improve readability of futures.
+<a href="https://crates.io/crates/tokio/reverse_dependencies">Many</a> libraries implement Tokio, including <a href="https://hyper.rs/guides/"><code>hyper</code></a> and <a href="https://actix.rs/book/actix/"><code>actix</code></a>.</p>
+
 <h1 id="example">Example</h1>
 
 <p>A basic TCP echo server with Tokio:</p>
@@ -433,7 +437,7 @@ fn main() {
 }
 </code></pre>
 
-<p>More examples can be found <a href="examples">here</a>.</p>
+<p>More examples can be found <a href="https://github.com/tokio-rs/tokio/tree/master/examples">here</a>.</p>
 
       
       

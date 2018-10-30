@@ -88,9 +88,9 @@ The server is going to use a line-based protocol. Lines are terminated by \r\n. 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio.rs/docs/io/overview/</guid>
-      <description>Rust std::io module provides traits that synchronously access resources like files and sockets. These Read and Write traits are implemented in other modules including std::fs and std::net.
-The tokio crate comes with a variation on those types, AsyncRead and AsyncWrite. The primary difference between AsyncRead and std::io::Read is the futures::Async return values. The implementation returns an Error, NotReady, or Ready value.
-Non Blocking The nature of a polling data reader/writer allows for other tasks to operate before data reaches the socket or disk queue.</description>
+      <description>Rust provides types, traits, and helpers for performing synchronous I/O operations, such as working with TCP, UDP, and, reading from and writing to files.
+The tokio crate improves on those operations by providing non-blocking versions. Tokio provides the high level interfaces to asynchronous I/O for
+ TCP sockets UDP sockets Unix sockets File operations  Blocking vs Non-Blocking Synchronous operations evaluate in a guaranteed sequential manner, and require expressions to complete before the next operation executes.</description>
     </item>
     
     <item>
@@ -260,7 +260,7 @@ One of the simplest forms of framed message is the line delimited message. Each 
       
       <guid>https://tokio.rs/docs/internals/net/</guid>
       <description>This section describes the network resources and drivers provided by Tokio. This component provides one of Tokio&amp;rsquo;s primary functions: non-blocking, event-driven, networking provided by the appropriate operating system primitives (epoll, kqueue, IOCP, &amp;hellip;). It is modeled after the resource and driver pattern described in the previous section.
-The network driver is built using [mio] and network resources are backed by types that implement Evented.
+The network driver is built using mio and network resources are backed by types that implement Evented.
 This guide will be focused on TCP types.</description>
     </item>
     

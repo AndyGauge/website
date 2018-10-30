@@ -270,7 +270,7 @@ networking provided by the appropriate operating system primitives (epoll,
 kqueue, IOCP, &hellip;). It is modeled after the resource and driver pattern
 described in the previous section.</p>
 
-<p>The network driver is built using [mio] and network resources are backed by
+<p>The network driver is built using <a href="https://docs.rs/mio/">mio</a> and network resources are backed by
 types that implement <a href="https://docs.rs/mio/0.6/mio/event/trait.Evented.html"><code>Evented</code></a>.</p>
 
 <p>This guide will be focused on TCP types. The other network resources (UDP, unix
@@ -522,7 +522,7 @@ tokio::run(future::lazy(move || {
 <h1 id="the-network-driver">The network driver</h1>
 
 <p>The driver that powers all of Tokio&rsquo;s network types is the [<code>Reactor</code>] type in
-the [<code>tokio-reactor</code>] crate. It is implemented using [mio]. Calls to
+the [<code>tokio-reactor</code>] crate. It is implemented using <a href="https://docs.rs/mio/">mio</a>. Calls to
 [<code>Reactor::turn</code>] uses [<code>mio::Poll::poll</code>] to get operating system events for
 registered network resources. It then notifies the registered tasks for each
 network resource using the [task system]. The tasks then get scheduled to run on
